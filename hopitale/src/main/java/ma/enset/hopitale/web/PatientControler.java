@@ -17,12 +17,20 @@ import java.util.List;
 public class PatientControler {
     private PatientRepository patientRepository;
     @GetMapping("/index")
-    public String index(Model model, @RequestParam(name="page",defaultValue = "0")int page,
-                                     @RequestParam(name="size",defaultValue = "4") int size){
-        Page<Patient>pagepatients=patientRepository.findAll(PageRequest.of(page,size));
-        model.addAttribute("listePatients",pagepatients.getContent());
-        model.addAttribute("page",new int [pagepatients.getTotalPages()]);
-
+    public String index(Model model, @RequestParam(name="page",defaultValue = "0")int p,
+                                     @RequestParam(name="size",defaultValue = "4") int s,
+                                     @RequestParam(name="keyword",defaultValue = "")String Kw)
+    {
+        Page<Patient>pagePatients=patientRepository.findByNomContains(Kw,PageRequest.of(p,s));
+        model.addAttribute("listPatients",pagePatients.getContent());
+        model.addAttribute("pages",new int [pagePatients.getTotalPages()]);
+        model.addAttribute("currentPage",p);
+        model.addAttribute("keyword",Kw);
         return "patients";
+    }
+    @GetMapping("/delete")
+    public String delete(Long id,String keyword,int page){
+        patientRepository.deleteById(id);
+        return "redirect:/index?page="+page+"&keyword="+keyword;
     }
 }
